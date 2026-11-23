@@ -1,0 +1,106 @@
+
+<ion-header>
+  <ion-toolbar class="dashboard-toolbar">
+    <ion-title>Control Electoral</ion-title>
+
+    <ion-button
+      slot="end"
+      fill="clear"
+      (click)="cerrarSesion()">
+
+      <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="dashboard-content">
+
+  <div class="dashboard-container">
+
+    <div class="welcome-section">
+      <p class="welcome-label">PANEL PROVINCIAL</p>
+
+      <h1>Bienvenido</h1>
+
+      <h2>{{ nombreUsuario }}</h2>
+
+      <p>
+        Administra los recintos electorales y supervisa
+        el avance del escrutinio.
+      </p>
+    </div>
+
+    <div class="location-banner">
+      <ion-icon name="location-outline"></ion-icon>
+
+      <div>
+        <strong>Provincia de Pichincha</strong>
+        <span>Cantón Quito</span>
+      </div>
+    </div>
+
+    <div class="section-heading">
+      <h3>Módulos de administración</h3>
+      <p>Selecciona una opción para continuar.</p>
+    </div>
+
+    <div class="modules-grid">
+
+      <ion-card class="module-card" (click)="irARecintos()">
+        <ion-card-header>
+          <div class="module-icon">
+            <ion-icon name="business-outline"></ion-icon>
+          </div>
+
+          <ion-card-title>Recintos</ion-card-title>
+          <ion-card-subtitle>
+            Gestión de recintos electorales
+          </ion-card-subtitle>
+        </ion-card-header>
+      </ion-card>
+
+      <ion-card class="module-card" (click)="mostrarProximamente()">
+        <ion-card-header>
+          <div class="module-icon">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+
+          <ion-card-title>Coordinadores</ion-card-title>
+          <ion-card-subtitle>
+            Crear y asignar responsables
+          </ion-card-subtitle>
+        </ion-card-header>
+      </ion-card>
+
+      <ion-card class="module-card" (click)="mostrarProximamente()">
+        <ion-card-header>
+          <div class="module-icon">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+
+          <ion-card-title>Actas</ion-card-title>
+          <ion-card-subtitle>
+            Seguimiento del escrutinio
+          </ion-card-subtitle>
+        </ion-card-header>
+      </ion-card>
+
+      <ion-card class="module-card" (click)="mostrarProximamente()">
+        <ion-card-header>
+          <div class="module-icon">
+            <ion-icon name="bar-chart-outline"></ion-icon>
+          </div>
+
+          <ion-card-title>Resultados</ion-card-title>
+          <ion-card-subtitle>
+            Dashboard electoral
+          </ion-card-subtitle>
+        </ion-card-header>
+      </ion-card>
+
+    </div>
+
+  </div>
+
+</ion-content>
