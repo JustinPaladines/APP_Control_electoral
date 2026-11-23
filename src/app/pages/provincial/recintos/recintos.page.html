@@ -1,0 +1,94 @@
+
+<ion-header>
+  <ion-toolbar class="recintos-toolbar">
+
+    <ion-button slot="start" fill="clear" (click)="regresar()">
+      <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+
+    <ion-title>Recintos electorales</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="recintos-content">
+
+  <div class="recintos-container">
+
+    <div class="recintos-heading">
+      <div>
+        <h1>Gestión de recintos</h1>
+        <p>Provincia de Pichincha · Cantón Quito</p>
+      </div>
+
+      <ion-button (click)="crearRecinto()">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Nuevo
+      </ion-button>
+    </div>
+
+    @if (recintosService.cargando()) {
+
+      <div class="estado">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Cargando recintos...</p>
+      </div>
+
+    } @else if (recintosService.error()) {
+
+      <div class="estado">
+        <p>{{ recintosService.error() }}</p>
+        <ion-button (click)="recintosService.cargarRecintos()">
+          Reintentar
+        </ion-button>
+      </div>
+
+    } @else if (recintosService.recintos().length === 0) {
+
+      <div class="estado">
+        <ion-icon name="business-outline"></ion-icon>
+        <h3>No hay recintos registrados</h3>
+        <p>Los recintos aparecerán aquí cuando sean registrados.</p>
+      </div>
+
+    } @else {
+
+      <p class="total">
+        Total de recintos: {{ recintosService.recintos().length }}
+      </p>
+
+      <div class="recintos-grid">
+
+        @for (recinto of recintosService.recintos(); track recinto.id) {
+
+          <ion-card class="recinto-card">
+            <ion-card-content>
+
+              <div class="recinto-icono">
+                <ion-icon name="business-outline"></ion-icon>
+              </div>
+
+              <h2>{{ recinto.nombre }}</h2>
+
+              <p>
+                <ion-icon name="location-outline"></ion-icon>
+                {{ recinto.parroquia }}, {{ recinto.canton }}
+              </p>
+
+              <div class="jrv">
+                <strong>{{ recinto.cantidad_jrv }}</strong>
+                <span>Juntas receptoras del voto</span>
+              </div>
+
+            </ion-card-content>
+          </ion-card>
+
+        }
+
+      </div>
+
+    }
+
+  </div>
+
+</ion-content>
