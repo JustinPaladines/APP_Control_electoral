@@ -10,7 +10,6 @@ import {
   IonButton,
   IonIcon,
   IonCard,
-  IonCardContent,
   IonCardHeader,
   IonCardTitle,
   IonCardSubtitle,
@@ -42,7 +41,6 @@ import { AuthService } from '../../../core/services/auth.service';
     IonButton,
     IonIcon,
     IonCard,
-    IonCardContent,
     IonCardHeader,
     IonCardTitle,
     IonCardSubtitle
@@ -87,6 +85,10 @@ export class DashboardProvincialPage {
     });
 
     await toast.present();
+  }
+
+  irCoordinadores(): void {
+    this.router.navigateByUrl('/provincial/coordinadores');
   }
 
   async cerrarSesion(): Promise<void> {
