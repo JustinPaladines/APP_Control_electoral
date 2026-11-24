@@ -287,8 +287,39 @@ Deno.serve(async (req) => {
 
     console.error(error);
 
+    // Envía el correo de confirmación de la cuenta
+  const clienteCorreo = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+
+    const { error: errorCorreo } = await clienteCorreo.auth.resend({
+      type: 'signup',
+      email: correo
+    });
+
+    if (errorCorreo) {
+      console.error('Error al enviar correo:', errorCorreo);
+
+      return responder({
+        mensaje: 'Usuario registrado, pero no se pudo enviar el correo',
+        usuario_id: cuenta.user.id,
+        correo_enviado: false
+      }, 201);
+    }
+
     return responder({
-      error: 'Error interno del servidor'
-    }, 500);
+      mensaje: 'Usuario registrado correctamente',
+      usuario_id: cuenta.user.id,
+      correo_enviado: true
+    }, 201);
   }
+
+
 });

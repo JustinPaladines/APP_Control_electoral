@@ -1,21 +1,26 @@
-
-import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
   IonContent,
-  IonInput,
   IonButton,
-  IonIcon,
-  IonText,
+  IonInput,
   IonItem,
-  IonLabel,
-  ToastController
+  IonIcon,
+  IonSpinner
 } from '@ionic/angular';
 
+import {
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
+
 import { addIcons } from 'ionicons';
-import { mailOutline, arrowBackOutline } from 'ionicons/icons';
+import { keyOutline } from 'ionicons/icons';
 
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -25,55 +30,72 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./recuperar-password.page.scss'],
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
     IonContent,
-    IonInput,
     IonButton,
-    IonIcon,
-    IonText,
+    IonInput,
     IonItem,
-    IonLabel
+    IonIcon,
+    IonSpinner,
+    ReactiveFormsModule
   ]
 })
 export class RecuperarPasswordPage {
 
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
-  private readonly toast = inject(ToastController);
+  private readonly authService = inject(AuthService);
 
-  readonly authService = inject(AuthService);
+  readonly cargando = signal(false);
+  readonly error = signal('');
 
-  formulario = this.fb.group({
-    correo: ['', [Validators.required, Validators.email]]
+  formulario = this.fb.nonNullable.group({
+    correo: ['', [
+      Validators.required,
+      Validators.email
+    ]]
   });
 
   constructor() {
-    addIcons({ mailOutline, arrowBackOutline });
+    addIcons({ keyOutline });
   }
 
-  async enviarSolicitud(): Promise<void> {
+  async enviarCodigo(): Promise<void> {
 
-    if (this.formulario.invalid) {
+    if (this.formulario.invalid || this.cargando()) {
       this.formulario.markAllAsTouched();
       return;
     }
 
-    const correo = this.formulario.controls.correo.value!;
+    this.cargando.set(true);
+    this.error.set('');
 
-    const correcto = await this.authService.recuperarPassword(correo);
+    try {
 
-    const mensaje = correcto
-      ? 'Si el correo está registrado, recibirás instrucciones para recuperar tu contraseña.'
-      : 'No se pudo procesar la solicitud. Inténtalo nuevamente.';
+      const correo = this.formulario.controls.correo.value
+        .trim()
+        .toLowerCase();
 
-    const aviso = await this.toast.create({
-      message: mensaje,
-      duration: 4000,
-      position: 'top',
-      color: correcto ? 'success' : 'danger'
-    });
+      const resultado = await this.authService.recuperarPassword(correo);
 
-    await aviso.present();
+      if (resultado === false) {
+        this.error.set('No se pudo enviar el código.');
+        return;
+      }
+
+      this.router.navigate(['/restablecer-password'], {
+        state: { correo }
+      });
+
+    } catch (error) {
+      console.error(error);
+      this.error.set('No se pudo enviar el código. Intenta más tarde.');
+
+    } finally {
+      this.cargando.set(false);
+    }
   }
 
   regresar(): void {

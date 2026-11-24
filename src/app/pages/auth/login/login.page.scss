@@ -127,6 +127,18 @@
     }
     }
 
+    .confirm-account {
+    text-align: center;
+    margin: -10px 0 20px;
+
+    a {
+        color: #49365f;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    }
+
     .login-button {
     --background: #49365f;
     --background-activated: #29213d;

@@ -30,7 +30,7 @@ export class AuthService {
 
   private readonly _sesionVerificada = signal(false);
 
-    readonly sesionVerificada = this._sesionVerificada.asReadonly();
+  readonly sesionVerificada = this._sesionVerificada.asReadonly();
 
   // Iniciar sesión utilizando la cédula.
   async iniciarSesion(
@@ -211,5 +211,31 @@ async restablecerPassword(nuevaPassword: string): Promise<boolean> {
     this._cargando.set(false);
   }
 }
+
+async confirmarCuenta(
+  correo: string,
+  codigo: string
+): Promise<void> {
+  await this.authRepository.confirmarCuenta(correo, codigo);
+}
+
+async reenviarCodigoConfirmacion(
+  correo: string
+): Promise<void> {
+  await this.authRepository.reenviarCodigoConfirmacion(correo);
+}
+
+async recuperarConCodigo(
+  correo: string,
+  codigo: string,
+  nuevaPassword: string
+): Promise<void> {
+  await this.authRepository.recuperarConCodigo(
+    correo,
+    codigo,
+    nuevaPassword
+  );
+}
+
 
 }

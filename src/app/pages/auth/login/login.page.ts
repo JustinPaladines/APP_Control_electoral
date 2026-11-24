@@ -56,6 +56,8 @@ export class LoginPage {
 
   mostrarPassword = false;
 
+  
+
   constructor() {
 
     addIcons({
@@ -130,11 +132,15 @@ export class LoginPage {
     );
 
     if (perfil.rol === 'provincial') {
-        await this.router.navigateByUrl('/provincial', {
-            replaceUrl: true
-        });
-        return;
-        }
+      this.router.navigateByUrl('/provincial', {
+        replaceUrl: true
+      });
+
+    } else if (perfil.rol === 'recinto') {
+      this.router.navigateByUrl('/recinto', {
+        replaceUrl: true
+      });
+    }
 
         await this.mostrarMensaje(
         'El panel de este rol todavía está en desarrollo.',
@@ -159,5 +165,9 @@ export class LoginPage {
     });
 
     await toast.present();
+  }
+
+  irConfirmarCuenta(): void {
+    this.router.navigateByUrl('/confirmar-cuenta');
   }
 }

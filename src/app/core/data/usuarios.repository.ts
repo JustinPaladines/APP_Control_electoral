@@ -34,7 +34,7 @@ export class UsuariosRepository {
     return (data ?? []) as Perfil[];
   }
 
-  async crear(usuario: NuevoUsuario): Promise<void> {
+  async crear(usuario: NuevoUsuario): Promise<string> {
 
     const { data, error } = await this.supabase.functions.invoke(
       'crear-usuario',
@@ -58,5 +58,7 @@ export class UsuariosRepository {
     if (data?.error) {
       throw new Error(data.error);
     }
+
+    return data?.mensaje ?? 'Usuario registrado correctamente.';
   }
 }

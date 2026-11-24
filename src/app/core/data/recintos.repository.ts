@@ -53,4 +53,19 @@ export class RecintosRepository {
 
   return data as Recinto;
 }
+
+async obtenerPorId(id: number): Promise<Recinto> {
+
+  const { data, error } = await this.supabase
+    .from('recintos')
+    .select('id, nombre, canton, parroquia, cantidad_jrv, provincia')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Recinto;
+}
 }

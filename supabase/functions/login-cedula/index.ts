@@ -1,143 +1,158 @@
+import { createClient } from 'npm:@supabase/supabase-js@2';
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-// Configuración de CORS.
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
 
-// Respuesta uniforme para errores.
-function errorResponse(message: string, status: number) {
-  return new Response(
-    JSON.stringify({ error: message }),
-    {
-      status,
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json",
-      },
-    },
-  );
+// Generar una respuesta uniforme.
+function responder(datos: object, estado = 200) {
+  return new Response(JSON.stringify(datos), {
+    status: estado,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'application/json'
+    }
+  });
 }
 
-// Función principal de autenticación.
 Deno.serve(async (req: Request) => {
 
-  // Gestionar solicitudes CORS.
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
+      headers: corsHeaders
+    });
   }
 
-  if (req.method !== "POST") {
-    return errorResponse("Método no permitido", 405);
+  if (req.method !== 'POST') {
+    return responder({ error: 'Método no permitido' }, 405);
   }
 
   try {
-    // Obtener las variables proporcionadas por Supabase.
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
 
-    const publishableKeys = JSON.parse(
-      Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") || "{}"
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    const secretKeys = JSON.parse(
-      Deno.env.get("SUPABASE_SECRET_KEYS") || "{}"
-    );
+    if (!supabaseUrl || !anonKey || !serviceRoleKey) {
+      console.error('Configuración de Supabase incompleta');
 
-    const anonKey = publishableKeys.default;
-    const secretKey = secretKeys.default;
-
-    if (!supabaseUrl || !anonKey || !secretKey) {
-      console.error("Configuración de Supabase incompleta");
-      return errorResponse("Error interno del servidor", 500);
+      return responder({
+        error: 'Error interno del servidor'
+      }, 500);
     }
 
-    // Leer y validar los datos recibidos.
-    const body = await req.json();
-    const { cedula, password } = body;
+    const { cedula, password } = await req.json();
 
+    // Validar los datos recibidos.
     if (
-      typeof cedula !== "string" ||
+      typeof cedula !== 'string' ||
       !/^\d{10}$/.test(cedula) ||
-      typeof password !== "string" ||
+      typeof password !== 'string' ||
       password.length === 0
     ) {
-      return errorResponse("Datos de acceso inválidos", 400);
+      return responder({
+        error: 'Datos de acceso inválidos'
+      }, 400);
     }
 
-    // Cliente administrativo para consultar el perfil.
+    // Cliente administrativo.
     const adminClient = createClient(
       supabaseUrl,
-      secretKey,
+      serviceRoleKey,
       {
         auth: {
           persistSession: false,
-          autoRefreshToken: false,
-        },
-      },
+          autoRefreshToken: false
+        }
+      }
     );
 
-    // Buscar el correo asociado a la cédula.
+    // Buscar el perfil mediante la cédula.
     const { data: perfil, error: perfilError } =
       await adminClient
-        .from("perfiles")
-        .select("correo")
-        .eq("cedula", cedula)
+        .from('perfiles')
+        .select('id, correo')
+        .eq('cedula', cedula)
         .maybeSingle();
 
     if (perfilError) {
-      console.error("Error consultando perfil:", perfilError);
-      return errorResponse("No se pudo completar el acceso", 500);
+      console.error('Error consultando perfil:', perfilError);
+
+      return responder({
+        error: 'No se pudo completar el acceso'
+      }, 500);
     }
 
     if (!perfil) {
-      return errorResponse("Credenciales incorrectas", 401);
+      console.error('Perfil no encontrado');
+
+      return responder({
+        error: 'Credenciales incorrectas'
+      }, 401);
     }
 
-    // Cliente público para autenticar mediante Supabase Auth.
+    // Obtener la cuenta de Authentication.
+    const { data: cuenta, error: errorCuenta } =
+      await adminClient.auth.admin.getUserById(perfil.id);
+
+    if (errorCuenta || !cuenta.user?.email) {
+      console.error('Error consultando cuenta:', errorCuenta);
+
+      return responder({
+        error: 'Credenciales incorrectas'
+      }, 401);
+    }
+
+    // Cliente público para autenticar al usuario.
     const authClient = createClient(
       supabaseUrl,
       anonKey,
       {
         auth: {
           persistSession: false,
-          autoRefreshToken: false,
-        },
-      },
+          autoRefreshToken: false
+        }
+      }
     );
 
-    // Supabase verifica la contraseña y genera la sesión.
+    // Verificar las credenciales.
     const { data, error } =
       await authClient.auth.signInWithPassword({
-        email: perfil.correo,
-        password,
+        email: cuenta.user.email,
+        password: password
       });
 
     if (error || !data.session) {
-      return errorResponse("Credenciales incorrectas", 401);
+
+      console.error('Resultado de autenticación:', {
+        version: 'login-v2',
+        codigo: error?.code,
+        mensaje: error?.message,
+        correosCoinciden: perfil.correo === cuenta.user.email,
+        correoConfirmado: !!cuenta.user.email_confirmed_at
+      });
+
+      return responder({
+        error: 'Credenciales incorrectas'
+      }, 401);
     }
 
-    // Devolver los datos necesarios para establecer la sesión.
-    return new Response(
-      JSON.stringify({
-        session: data.session,
-        user: data.user,
-      }),
-      {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    console.log('Autenticación correcta - login-v2');
+
+    return responder({
+      session: data.session,
+      user: data.user
+    });
 
   } catch (error) {
-    console.error("Error interno en login-cedula:", error);
 
-    return errorResponse("Error interno del servidor", 500);
+    console.error('Error interno:', error);
+
+    return responder({
+      error: 'Error interno del servidor'
+    }, 500);
   }
 });

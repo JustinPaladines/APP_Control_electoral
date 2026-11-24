@@ -1,0 +1,101 @@
+
+<ion-header>
+  <ion-toolbar class="toolbar">
+    <ion-title>Confirmar cuenta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="contenido">
+
+  <div class="contenedor">
+
+    <div class="tarjeta">
+
+      <div class="icono">
+        <ion-icon name="mail-outline"></ion-icon>
+      </div>
+
+      <h1>Verifica tu correo</h1>
+
+      <p>
+        Ingresa tu correo electrónico y el código
+        de confirmación recibido.
+      </p>
+
+      <form [formGroup]="formulario"
+            (ngSubmit)="confirmar()">
+
+        <label>Correo electrónico</label>
+
+        <ion-item lines="none">
+          <ion-input
+            type="email"
+            formControlName="correo"
+            placeholder="correo@ejemplo.com">
+          </ion-input>
+        </ion-item>
+
+        <label>Código de verificación</label>
+
+        <ion-item lines="none">
+          <ion-input
+            class="codigo"
+            type="text"
+            inputmode="numeric"
+            maxlength="10"
+            formControlName="codigo"
+            placeholder="Ingresa el código">
+          </ion-input>
+        </ion-item>
+
+        @if (formulario.invalid && formulario.touched) {
+          <small>Ingresa un correo y código válidos.</small>
+        }
+
+        @if (error()) {
+          <div class="mensaje-error">{{ error() }}</div>
+        }
+
+        @if (exito()) {
+          <div class="mensaje-exito">{{ exito() }}</div>
+        }
+
+        <ion-button
+          expand="block"
+          type="submit"
+          [disabled]="cargando()">
+
+          @if (cargando()) {
+            <ion-spinner name="crescent"></ion-spinner>
+          } @else {
+            Confirmar cuenta
+          }
+
+        </ion-button>
+
+      </form>
+
+      <ion-button
+        expand="block"
+        fill="clear"
+        [disabled]="cargando()"
+        (click)="reenviar()">
+
+        Reenviar código
+
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        fill="clear"
+        (click)="regresar()">
+
+        Volver al inicio de sesión
+
+      </ion-button>
+
+    </div>
+
+  </div>
+
+</ion-content>

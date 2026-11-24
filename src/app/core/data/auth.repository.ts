@@ -31,6 +31,7 @@ export class AuthRepository {
     password: string
   ): Promise<ResultadoLogin> {
 
+
     // Invocar la Edge Function.
     const { data, error } =
       await this.supabase.functions.invoke<LoginCedulaResponse>(
@@ -44,8 +45,18 @@ export class AuthRepository {
       );
 
     if (error) {
-      throw error;
-    }
+  if (error.context instanceof Response) {
+    const respuesta = await error.context.json().catch(() => null);
+
+    console.error('Respuesta de login-cedula:', respuesta);
+
+    throw new Error(
+      respuesta?.error || respuesta?.message || 'Error de autenticación'
+    );
+  }
+
+  throw error;
+}
 
     if (!data?.session) {
       throw new Error('No se recibió una sesión válida.');
@@ -181,12 +192,10 @@ export class AuthRepository {
   // Solicitar recuperación de contraseña.
 async recuperarPassword(correo: string): Promise<void> {
 
-  const { error } = await this.supabase.auth.resetPasswordForEmail(
-    correo,
-    {
-      redirectTo: `${window.location.origin}/restablecer-password`
-    }
-  );
+  const { error } =
+    await this.supabase.auth.resetPasswordForEmail(
+      correo.trim().toLowerCase()
+    );
 
   if (error) {
     throw error;
@@ -200,6 +209,74 @@ async restablecerPassword(nuevaPassword: string): Promise<void> {
 
   if (error) {
     throw error;
+  }
+}
+
+// Reenviar el código de confirmación.
+async reenviarCodigoConfirmacion(correo: string): Promise<void> {
+
+  const { error } = await this.supabase.auth.resend({
+    type: 'signup',
+    email: correo.trim().toLowerCase()
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
+// Confirmar la cuenta mediante OTP.
+async confirmarCuenta(
+  correo: string,
+  codigo: string
+): Promise<void> {
+
+  const { error } = await this.supabase.auth.verifyOtp({
+    email: correo.trim().toLowerCase(),
+    token: codigo.trim(),
+    type: 'signup'
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  // Cerrar la sesión generada por la verificación.
+  await this.supabase.auth.signOut({ scope: 'local' });
+}
+
+// Verificar el código y actualizar la contraseña.
+async recuperarConCodigo(
+  correo: string,
+  codigo: string,
+  nuevaPassword: string
+): Promise<void> {
+
+  const { data, error } = await this.supabase.auth.verifyOtp({
+    email: correo.trim().toLowerCase(),
+    token: codigo.trim(),
+    type: 'recovery'
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data.session) {
+    throw new Error('No se pudo verificar el código.');
+  }
+
+  try {
+    const { error: errorPassword } =
+      await this.supabase.auth.updateUser({
+        password: nuevaPassword
+      });
+
+    if (errorPassword) {
+      throw errorPassword;
+    }
+  } finally {
+    await this.supabase.auth.signOut({ scope: 'local' });
   }
 }
 

@@ -1,25 +1,28 @@
+import { Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
-import { Component, inject } from '@angular/core';
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButton,
+  IonInput,
+  IonItem,
+  IonIcon,
+  IonSpinner
+} from '@ionic/angular';
+
 import {
   FormBuilder,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
 
-import { Router, RouterLink } from '@angular/router';
-
-import {
-  IonContent,
-  IonInput,
-  IonButton,
-  IonItem,
-  IonLabel,
-  IonText,
-  ToastController
-} from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { lockClosedOutline } from 'ionicons/icons';
 
 import { AuthService } from '../../../core/services/auth.service';
-import { SUPABASE_CLIENT } from '../../../core/data/supabase.client';
 
 @Component({
   selector: 'app-restablecer-password',
@@ -27,139 +30,116 @@ import { SUPABASE_CLIENT } from '../../../core/data/supabase.client';
   styleUrls: ['./restablecer-password.page.scss'],
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
     IonContent,
-    IonInput,
     IonButton,
+    IonInput,
     IonItem,
-    IonLabel,
-    IonText,
-    RouterLink
+    IonIcon,
+    IonSpinner,
+    ReactiveFormsModule
   ]
 })
 export class RestablecerPasswordPage {
 
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
-  private readonly toastController = inject(ToastController);
-  private readonly supabase = inject(SUPABASE_CLIENT);
+  private readonly authService = inject(AuthService);
 
-  readonly authService = inject(AuthService);
+  readonly cargando = signal(false);
+  readonly error = signal('');
+  readonly exito = signal(false);
 
-  enlaceValido = false;
-  verificando = true;
-
-  formulario = this.fb.group({
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    confirmar: ['', [Validators.required]]
+  formulario = this.fb.nonNullable.group({
+    correo: ['', [
+      Validators.required,
+      Validators.email
+    ]],
+    codigo: ['', [
+      Validators.required,
+      Validators.pattern(/^\d{6,10}$/)
+    ]],
+    password: ['', [
+      Validators.required,
+      Validators.minLength(8)
+    ]],
+    confirmarPassword: ['', [
+      Validators.required
+    ]]
   });
 
   constructor() {
-    this.verificarEnlace();
-  }
 
-  async verificarEnlace(): Promise<void> {
-    try {
-      const url = new URL(window.location.href);
-      const codigo = url.searchParams.get('code');
-      const tokenHash = url.searchParams.get('token_hash');
-      const tipo = url.searchParams.get('type');
+    addIcons({ lockClosedOutline });
 
-      if (codigo) {
-        const { error } =
-          await this.supabase.auth.exchangeCodeForSession(codigo);
+    const correo = history.state?.correo;
 
-        if (error) {
-          throw error;
-        }
-
-        this.enlaceValido = true;
-
-      } else if (tokenHash && tipo === 'recovery') {
-        const { error } = await this.supabase.auth.verifyOtp({
-          token_hash: tokenHash,
-          type: 'recovery'
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        this.enlaceValido = true;
-
-      } else {
-        // Enlaces que ya establecieron una sesión durante la redirección.
-        const { data } = await this.supabase.auth.getSession();
-        this.enlaceValido = !!data.session;
-      }
-
-    } catch (error) {
-      console.error('Enlace de recuperación inválido:', error);
-      this.enlaceValido = false;
-
-    } finally {
-      this.verificando = false;
+    if (typeof correo === 'string') {
+      this.formulario.controls.correo.setValue(correo);
     }
   }
 
-  async guardar(): Promise<void> {
-    if (!this.enlaceValido) {
-      return;
-    }
+  async restablecer(): Promise<void> {
 
-    if (this.formulario.invalid) {
+    if (this.formulario.invalid || this.cargando()) {
       this.formulario.markAllAsTouched();
       return;
     }
 
-    const { password, confirmar } = this.formulario.getRawValue();
+    this.error.set('');
 
-    if (password !== confirmar) {
-      await this.mostrarMensaje('Las contraseñas no coinciden.', 'danger');
+    const {
+      correo,
+      codigo,
+      password,
+      confirmarPassword
+    } = this.formulario.getRawValue();
+
+    if (password !== confirmarPassword) {
+      this.error.set('Las contraseñas no coinciden.');
       return;
     }
 
     if (password === 'Ecuador2026') {
-      await this.mostrarMensaje(
-        'Utiliza una contraseña diferente a la inicial.',
-        'danger'
-      );
+      this.error.set('Selecciona una contraseña diferente a la inicial.');
       return;
     }
 
-    const correcto = await this.authService.restablecerPassword(password!);
+    this.cargando.set(true);
 
-    if (!correcto) {
-      await this.mostrarMensaje(
-        this.authService.error() ?? 'No se pudo cambiar la contraseña.',
-        'danger'
+    try {
+
+      await this.authService.recuperarConCodigo(
+        correo,
+        codigo,
+        password
       );
-      return;
+
+      this.exito.set(true);
+      this.formulario.reset();
+
+    } catch (error) {
+
+      console.error(error);
+
+      this.error.set(
+        'No se pudo actualizar la contraseña. Comprueba el código o solicita uno nuevo.'
+      );
+
+    } finally {
+      this.cargando.set(false);
     }
-
-    await this.mostrarMensaje(
-      'Contraseña actualizada correctamente.',
-      'success'
-    );
-
-    await this.authService.cerrarSesion();
-
-    await this.router.navigateByUrl('/login', {
-      replaceUrl: true
-    });
   }
 
-  private async mostrarMensaje(
-    mensaje: string,
-    color: 'success' | 'danger'
-  ): Promise<void> {
-    const toast = await this.toastController.create({
-      message: mensaje,
-      color,
-      duration: 3000,
-      position: 'top'
-    });
+  solicitarOtroCodigo(): void {
+    this.router.navigateByUrl('/recuperar-password');
+  }
 
-    await toast.present();
+  regresar(): void {
+    this.router.navigateByUrl('/login', {
+      replaceUrl: true
+    });
   }
 }

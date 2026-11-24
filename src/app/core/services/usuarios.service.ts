@@ -52,13 +52,13 @@ export class UsuariosService {
 
     try {
 
-      await this.repository.crear(usuario);
+      const mensaje = await this.repository.crear(usuario);
 
       if (usuario.rol === 'recinto') {
         await this.cargarCoordinadores();
       }
 
-      this._exito.set('Usuario registrado correctamente.');
+      this._exito.set(mensaje);
 
       return true;
 

@@ -118,9 +118,18 @@ export class CambiarPasswordPage {
     );
 
     // La navegación por rol se completará con los paneles.
-    await this.router.navigateByUrl('/provincial', {
-    replaceUrl: true
-    });
+    const perfil = this.authService.perfil();
+
+    if (perfil?.rol === 'provincial') {
+      this.router.navigateByUrl('/provincial', {
+        replaceUrl: true
+      });
+
+    } else if (perfil?.rol === 'recinto') {
+      this.router.navigateByUrl('/recinto', {
+        replaceUrl: true
+      });
+    }
   }
 
   private async mostrarMensaje(

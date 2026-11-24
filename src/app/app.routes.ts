@@ -2,6 +2,7 @@ import type { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { cambiarPasswordGuard } from './core/guards/cambiar-password.guard';
 import { provincialGuard } from './core/guards/provincial.guard';
+import { recintoGuard } from './core/guards/recinto.guard';
 
 export const routes: Routes = [
   {
@@ -39,16 +40,25 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/provincial/recintos/recintos.page').then((m) => m.RecintosPage),
   },
   {
-  path: 'provincial/coordinadores',
-  canActivate: [provincialGuard],
-  loadComponent: () =>
-    import('./pages/provincial/coordinadores/coordinadores.page')
-      .then(m => m.CoordinadoresPage)
-},
+    path: 'provincial/coordinadores',
+    canActivate: [provincialGuard],
+    loadComponent: () => import('./pages/provincial/coordinadores/coordinadores.page').then((m) => m.CoordinadoresPage),
+  },
+  {
+    path: 'confirmar-cuenta',
+    loadComponent: () =>
+      import('./pages/auth/confirmar-cuenta/confirmar-cuenta.page')
+        .then(m => m.ConfirmarCuentaPage)
+  },
   {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full',
+  },
+  {
+    path: 'recinto',
+    canActivate: [recintoGuard],
+    loadComponent: () => import('./pages/recinto/dashboard/dashboard.page').then((m) => m.DashboardRecintoPage),
   },
   {
     path: '**',
@@ -57,5 +67,5 @@ export const routes: Routes = [
   {
     path: 'coordinadores',
     loadComponent: () => import('./pages/provincial/coordinadores/coordinadores.page').then((m) => m.CoordinadoresPage),
-  },
+  }
 ];

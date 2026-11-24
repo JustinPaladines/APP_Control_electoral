@@ -58,4 +58,8 @@ export class RecintosService {
     this._cargando.set(false);
   }
 }
+
+async obtenerRecinto(id: number): Promise<Recinto> {
+  return this.repository.obtenerPorId(id);
+}
 }
