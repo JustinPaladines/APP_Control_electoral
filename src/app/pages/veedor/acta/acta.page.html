@@ -1,0 +1,289 @@
+
+<ion-header>
+  <ion-toolbar class="toolbar">
+
+    <ion-button
+      slot="start"
+      fill="clear"
+      (click)="regresar()">
+
+      <ion-icon name="arrow-back-outline"></ion-icon>
+
+    </ion-button>
+
+    <ion-title>Registro de acta</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="contenido">
+
+  <div class="contenedor">
+
+    <div class="encabezado">
+
+      <ion-icon name="document-text-outline"></ion-icon>
+
+      <span>JRV N.º {{ numeroJunta() }}</span>
+
+      <h1>Acta de {{ titulo() }}</h1>
+
+      <p>Registro de resultados electorales</p>
+
+    </div>
+
+    @if (cargando()) {
+
+      <div class="cargando">
+
+        <ion-spinner name="crescent"></ion-spinner>
+
+        <p>Cargando información electoral...</p>
+
+      </div>
+
+    }
+
+    @if (error()) {
+
+      <div class="mensaje-error">{{ error() }}</div>
+
+      <ion-button
+        expand="block"
+        (click)="cargarFormulario()">
+
+        Reintentar
+
+      </ion-button>
+
+    }
+
+    @if (formularioListo()) {
+
+      @if (actasService.actaActual()) {
+
+        <div class="mensaje-info">
+          Existe un acta registrada.
+          Puedes corregir sus resultados.
+        </div>
+
+      }
+
+      <form
+        [formGroup]="formulario"
+        (ngSubmit)="guardarActa()">
+
+        <div class="tarjeta">
+
+          <h2>Total de sufragantes</h2>
+
+          <p>Número total de personas que votaron.</p>
+
+          <ion-item lines="none">
+
+            <ion-input
+              type="number"
+              min="0"
+              step="1"
+              formControlName="total_sufragantes">
+
+            </ion-input>
+
+          </ion-item>
+
+        </div>
+
+        <div class="tarjeta">
+
+          <h2>Votos por organización</h2>
+
+          <div formArrayName="votos">
+
+            @for (
+              candidatura of actasService.candidaturas();
+              track candidatura.id;
+              let i = $index
+            ) {
+
+              <div class="candidato">
+
+                <div class="numero">{{ i + 1 }}</div>
+
+                <div class="informacion">
+
+                  <h3>{{ candidatura.organizacion.nombre }}</h3>
+
+                  <p>
+                    {{ candidatura.nombre_candidato }}
+                    {{ candidatura.apellidos_candidato }}
+                  </p>
+
+                </div>
+
+                <ion-item lines="none" class="campo-votos">
+
+                  <ion-input
+                    type="number"
+                    min="0"
+                    step="1"
+                    [formControlName]="i">
+
+                  </ion-input>
+
+                </ion-item>
+
+              </div>
+
+            }
+
+          </div>
+
+        </div>
+
+        <div class="tarjeta">
+
+          <h2>Otros votos</h2>
+
+          <div class="fila">
+
+            <label>Votos nulos</label>
+
+            <ion-item lines="none" class="campo-votos">
+
+              <ion-input
+                type="number"
+                min="0"
+                step="1"
+                formControlName="votos_nulos">
+
+              </ion-input>
+
+            </ion-item>
+
+          </div>
+
+          <div class="fila">
+
+            <label>Votos blancos</label>
+
+            <ion-item lines="none" class="campo-votos">
+
+              <ion-input
+                type="number"
+                min="0"
+                step="1"
+                formControlName="votos_blancos">
+
+              </ion-input>
+
+            </ion-item>
+
+          </div>
+
+        </div>
+
+        <div class="tarjeta">
+
+          <h2>Validación de resultados</h2>
+
+          <div class="totales">
+
+            <div>
+              <span>Total calculado</span>
+              <strong>{{ totalCalculado() }}</strong>
+            </div>
+
+            <div>
+              <span>Sufragantes</span>
+              <strong>{{ totalSufragantes() }}</strong>
+            </div>
+
+          </div>
+
+          @if (!cantidadesValidas()) {
+
+            <div class="mensaje-error">
+              Ingresa números enteros mayores o iguales a cero.
+            </div>
+
+          } @else if (totalesCorrectos()) {
+
+            <div class="mensaje-exito">
+
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+
+              Los votos coinciden correctamente.
+
+            </div>
+
+          } @else {
+
+            <div class="mensaje-error">
+
+              <ion-icon name="alert-circle-outline"></ion-icon>
+
+              @if (diferencia() > 0) {
+                Faltan {{ diferencia() }} votos.
+              } @else {
+                Sobran {{ diferencia() * -1 }} votos.
+              }
+
+            </div>
+
+          }
+
+        </div>
+
+        @if (actasService.error()) {
+
+          <div class="mensaje-error">
+            {{ actasService.error() }}
+          </div>
+
+        }
+
+        @if (actasService.exito()) {
+
+          <div class="mensaje-exito">
+            {{ actasService.exito() }}
+          </div>
+
+        }
+
+        <ion-button
+          expand="block"
+          type="submit"
+          [disabled]="
+            formulario.invalid ||
+            !totalesCorrectos() ||
+            actasService.cargando()
+          ">
+
+          @if (actasService.cargando()) {
+
+            <ion-spinner name="crescent"></ion-spinner>
+
+          } @else {
+
+            <ion-icon slot="start" name="save-outline"></ion-icon>
+
+            {{ actasService.actaActual()
+              ? 'Actualizar acta'
+              : 'Guardar acta' }}
+
+          }
+
+        </ion-button>
+
+        <p class="nota">
+          La fotografía y ubicación serán necesarias
+          para completar el acta.
+        </p>
+
+      </form>
+
+    }
+
+  </div>
+
+</ion-content>

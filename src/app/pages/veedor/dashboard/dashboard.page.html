@@ -33,14 +33,19 @@
     @if (cargando()) {
 
       <div class="cargando">
+
         <ion-spinner name="crescent"></ion-spinner>
-        <p>Consultando asignación...</p>
+
+        <p>Consultando información electoral...</p>
+
       </div>
 
     }
 
     @if (error()) {
+
       <div class="mensaje-error">{{ error() }}</div>
+
     }
 
     @if (recinto(); as datos) {
@@ -77,33 +82,52 @@
 
         <h2 class="titulo-seccion">Actas electorales</h2>
 
-        <div class="tarjeta acta">
+        @for (dignidad of dignidades; track dignidad.valor) {
 
-          <ion-icon name="document-text-outline"></ion-icon>
+          <div class="tarjeta acta">
 
-          <h2>Alcaldía</h2>
+            <ion-icon name="document-text-outline"></ion-icon>
 
-          <p>Registro de resultados para alcalde.</p>
+            <h2>{{ dignidad.nombre }}</h2>
 
-          <ion-button expand="block" [disabled]="true">
-            Próximamente
-          </ion-button>
+            <p>{{ dignidad.descripcion }}</p>
 
-        </div>
+            @if (obtenerActa(dignidad.valor); as acta) {
 
-        <div class="tarjeta acta">
+              <p>
+                Estado del acta: {{ acta.estado }}
+              </p>
 
-          <ion-icon name="document-text-outline"></ion-icon>
+              <p>
+                Total de sufragantes:
+                {{ acta.total_sufragantes }}
+              </p>
 
-          <h2>Prefectura</h2>
+              <ion-button
+                expand="block"
+                (click)="abrirActa(dignidad.valor)">
 
-          <p>Registro de resultados para prefecto.</p>
+                Consultar y corregir acta
 
-          <ion-button expand="block" [disabled]="true">
-            Próximamente
-          </ion-button>
+              </ion-button>
 
-        </div>
+            } @else {
+
+              <p>Acta pendiente de registro.</p>
+
+              <ion-button
+                expand="block"
+                (click)="abrirActa(dignidad.valor)">
+
+                Registrar acta
+
+              </ion-button>
+
+            }
+
+          </div>
+
+        }
 
       } @else {
 
@@ -129,6 +153,7 @@
       (click)="cargarDatos()">
 
       <ion-icon slot="start" name="refresh-outline"></ion-icon>
+
       Actualizar información
 
     </ion-button>

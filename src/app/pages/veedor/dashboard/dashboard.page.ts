@@ -24,7 +24,10 @@ import {
 import { AuthService } from '../../../core/services/auth.service';
 import { ElectoralService } from '../../../core/services/electoral.service';
 import { RecintosService } from '../../../core/services/recintos.service';
+import { ActasService } from '../../../core/services/actas.service';
+
 import { Recinto } from '../../../core/data/recintos.repository';
+import { Dignidad } from '../../../core/models/acta.model';
 
 @Component({
   selector: 'app-dashboard-veedor',
@@ -48,6 +51,7 @@ export class DashboardVeedorPage {
 
   readonly authService = inject(AuthService);
   readonly electoral = inject(ElectoralService);
+  readonly actasService = inject(ActasService);
 
   readonly recinto = signal<Recinto | null>(null);
   readonly cargando = signal(false);
@@ -56,6 +60,23 @@ export class DashboardVeedorPage {
   readonly junta = computed(
     () => this.electoral.juntas()[0] ?? null
   );
+
+  readonly dignidades: {
+  valor: Dignidad;
+  nombre: string;
+  descripcion: string;
+}[] = [
+  {
+    valor: 'alcaldia',
+    nombre: 'Alcaldía',
+    descripcion: 'Resultados electorales para alcalde.'
+  },
+  {
+    valor: 'prefectura',
+    nombre: 'Prefectura',
+    descripcion: 'Resultados electorales para prefecto.'
+  }
+];
 
   constructor() {
 
@@ -69,6 +90,7 @@ export class DashboardVeedorPage {
   }
 
   async ionViewWillEnter(): Promise<void> {
+
     await this.cargarDatos();
   }
 
@@ -101,14 +123,45 @@ export class DashboardVeedorPage {
         throw new Error(this.electoral.error());
       }
 
+      const actasCargadas = await this.actasService.cargarActas();
+
+      if (!actasCargadas) {
+        throw new Error(this.actasService.error());
+      }
+
     } catch (error) {
 
       console.error(error);
-      this.error.set('No se pudo consultar la asignación.');
+
+      this.error.set(
+        'No se pudo consultar la información electoral.'
+      );
 
     } finally {
+
       this.cargando.set(false);
     }
+  }
+
+  obtenerActa(dignidad: Dignidad) {
+
+    return this.actasService.actas().find(
+      acta =>
+        acta.dignidad === dignidad &&
+        acta.jrv_id === this.junta()?.id
+    );
+  }
+
+  abrirActa(dignidad: Dignidad): void {
+
+    if (!this.junta()) {
+      return;
+    }
+
+    this.router.navigate([
+      '/veedor/acta',
+      dignidad
+    ]);
   }
 
   async cerrarSesion(): Promise<void> {
