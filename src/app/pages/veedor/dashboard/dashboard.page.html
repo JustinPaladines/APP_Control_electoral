@@ -1,0 +1,138 @@
+
+<ion-header>
+  <ion-toolbar class="toolbar">
+
+    <ion-title>Control Electoral</ion-title>
+
+    <ion-button
+      slot="end"
+      fill="clear"
+      (click)="cerrarSesion()">
+
+      <ion-icon name="log-out-outline"></ion-icon>
+
+    </ion-button>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="contenido">
+
+  <div class="bienvenida">
+
+    <span>PANEL DEL VEEDOR</span>
+
+    <h1>Hola, {{ authService.perfil()?.nombres }}</h1>
+
+    <p>Supervisión y registro de resultados electorales.</p>
+
+  </div>
+
+  <div class="contenedor">
+
+    @if (cargando()) {
+
+      <div class="cargando">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Consultando asignación...</p>
+      </div>
+
+    }
+
+    @if (error()) {
+      <div class="mensaje-error">{{ error() }}</div>
+    }
+
+    @if (recinto(); as datos) {
+
+      <div class="tarjeta">
+
+        <ion-icon name="location-outline"></ion-icon>
+
+        <span>Recinto asignado</span>
+
+        <h2>{{ datos.nombre }}</h2>
+
+        <p>{{ datos.parroquia }} · {{ datos.canton }}</p>
+
+      </div>
+
+    }
+
+    @if (!cargando() && !error()) {
+
+      @if (junta(); as mesa) {
+
+        <div class="tarjeta junta">
+
+          <ion-icon name="grid-outline"></ion-icon>
+
+          <span>Junta receptora asignada</span>
+
+          <h2>JRV N.º {{ mesa.numero }}</h2>
+
+          <p>Estado: {{ mesa.estado }}</p>
+
+        </div>
+
+        <h2 class="titulo-seccion">Actas electorales</h2>
+
+        <div class="tarjeta acta">
+
+          <ion-icon name="document-text-outline"></ion-icon>
+
+          <h2>Alcaldía</h2>
+
+          <p>Registro de resultados para alcalde.</p>
+
+          <ion-button expand="block" [disabled]="true">
+            Próximamente
+          </ion-button>
+
+        </div>
+
+        <div class="tarjeta acta">
+
+          <ion-icon name="document-text-outline"></ion-icon>
+
+          <h2>Prefectura</h2>
+
+          <p>Registro de resultados para prefecto.</p>
+
+          <ion-button expand="block" [disabled]="true">
+            Próximamente
+          </ion-button>
+
+        </div>
+
+      } @else {
+
+        <div class="tarjeta">
+
+          <h2>Sin junta asignada</h2>
+
+          <p>
+            El coordinador de recinto debe asignarte
+            una junta antes de registrar resultados.
+          </p>
+
+        </div>
+
+      }
+
+    }
+
+    <ion-button
+      expand="block"
+      fill="outline"
+      [disabled]="cargando()"
+      (click)="cargarDatos()">
+
+      <ion-icon slot="start" name="refresh-outline"></ion-icon>
+      Actualizar información
+
+    </ion-button>
+
+  </div>
+
+</ion-content>

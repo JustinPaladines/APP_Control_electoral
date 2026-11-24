@@ -102,4 +102,18 @@ export class DashboardRecintoPage implements OnInit {
       replaceUrl: true
     });
   }
+
+  irJuntas(): void {
+
+  this.router.navigate(['/recinto/gestion'], {
+    queryParams: { seccion: 'juntas' }
+  });
+}
+
+irVeedores(): void {
+
+  this.router.navigate(['/recinto/gestion'], {
+    queryParams: { seccion: 'veedores' }
+  });
+}
 }

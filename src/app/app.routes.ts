@@ -3,6 +3,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { cambiarPasswordGuard } from './core/guards/cambiar-password.guard';
 import { provincialGuard } from './core/guards/provincial.guard';
 import { recintoGuard } from './core/guards/recinto.guard';
+import { veedorGuard } from './core/guards/veedor.guard';
 
 export const routes: Routes = [
   {
@@ -47,9 +48,22 @@ export const routes: Routes = [
   {
     path: 'confirmar-cuenta',
     loadComponent: () =>
-      import('./pages/auth/confirmar-cuenta/confirmar-cuenta.page')
-        .then(m => m.ConfirmarCuentaPage)
+      import('./pages/auth/confirmar-cuenta/confirmar-cuenta.page').then((m) => m.ConfirmarCuentaPage),
   },
+  {
+  path: 'recinto/gestion',
+  canActivate: [recintoGuard],
+  loadComponent: () =>
+    import('./pages/recinto/gestion/gestion.page')
+      .then(m => m.GestionPage)
+},
+{
+  path: 'veedor',
+  canActivate: [veedorGuard],
+  loadComponent: () =>
+    import('./pages/veedor/dashboard/dashboard.page')
+      .then(m => m.DashboardVeedorPage)
+},
   {
     path: '',
     redirectTo: 'login',
@@ -67,5 +81,9 @@ export const routes: Routes = [
   {
     path: 'coordinadores',
     loadComponent: () => import('./pages/provincial/coordinadores/coordinadores.page').then((m) => m.CoordinadoresPage),
-  }
+  },
+  {
+    path: 'gestion',
+    loadComponent: () => import('./pages/recinto/gestion/gestion.page').then((m) => m.GestionPage),
+  },
 ];

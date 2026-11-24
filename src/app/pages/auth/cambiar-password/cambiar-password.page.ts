@@ -121,14 +121,23 @@ export class CambiarPasswordPage {
     const perfil = this.authService.perfil();
 
     if (perfil?.rol === 'provincial') {
-      this.router.navigateByUrl('/provincial', {
+
+      await this.router.navigateByUrl('/provincial', {
         replaceUrl: true
       });
 
     } else if (perfil?.rol === 'recinto') {
-      this.router.navigateByUrl('/recinto', {
+
+      await this.router.navigateByUrl('/recinto', {
         replaceUrl: true
       });
+
+    } else if (perfil?.rol === 'veedor') {
+
+      await this.router.navigateByUrl('/veedor', {
+        replaceUrl: true
+      });
+
     }
   }
 
