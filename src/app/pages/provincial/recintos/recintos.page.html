@@ -27,6 +27,62 @@
       </ion-button>
     </div>
 
+
+    @if (mostrarFormulario) {
+
+    <div class="formulario-recinto">
+
+        <h2>Nuevo recinto electoral</h2>
+        <p>Provincia: Pichincha · Cantón: Quito</p>
+
+        <form [formGroup]="formulario" (ngSubmit)="guardarRecinto()">
+
+        <ion-label>Nombre del recinto</ion-label>
+        <ion-item lines="none">
+            <ion-input
+            formControlName="nombre"
+            placeholder="Ej. Unidad Educativa Central">
+            </ion-input>
+        </ion-item>
+
+        <ion-label>Parroquia</ion-label>
+        <ion-item lines="none">
+            <ion-input
+            formControlName="parroquia"
+            placeholder="Ej. Iñaquito">
+            </ion-input>
+        </ion-item>
+
+        <ion-label>Cantidad de JRV</ion-label>
+        <ion-item lines="none">
+            <ion-input
+            type="number"
+            min="1"
+            step="1"
+            formControlName="cantidad_jrv">
+            </ion-input>
+        </ion-item>
+
+        @if (formulario.invalid && formulario.touched) {
+            <p class="error-formulario">
+            Completa todos los campos. La cantidad de JRV debe ser mayor que cero.
+            </p>
+        }
+
+        <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="recintosService.cargando()">
+            {{ recintosService.cargando() ? 'Guardando...' : 'Guardar recinto' }}
+        </ion-button>
+
+        </form>
+
+    </div>
+
+    }
+
+
     @if (recintosService.cargando()) {
 
       <div class="estado">
@@ -86,6 +142,8 @@
         }
 
       </div>
+
+
 
     }
 

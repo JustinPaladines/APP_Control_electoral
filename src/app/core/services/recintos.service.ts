@@ -3,7 +3,8 @@ import { Injectable, inject, signal } from '@angular/core';
 
 import {
   RecintosRepository,
-  Recinto
+  Recinto,
+  NuevoRecinto
 } from '../data/recintos.repository';
 
 @Injectable({
@@ -38,4 +39,23 @@ export class RecintosService {
       this._cargando.set(false);
     }
   }
+
+  async crearRecinto(recinto: NuevoRecinto): Promise<boolean> {
+  this._cargando.set(true);
+  this._error.set(null);
+
+  try {
+    await this.repository.crear(recinto);
+    await this.cargarRecintos();
+    return true;
+
+  } catch (error) {
+    console.error('Error al crear recinto:', error);
+    this._error.set('No se pudo guardar el recinto.');
+    return false;
+
+  } finally {
+    this._cargando.set(false);
+  }
+}
 }

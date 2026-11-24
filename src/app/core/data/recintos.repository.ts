@@ -11,6 +11,14 @@ export interface Recinto {
   provincia: string;
 }
 
+export interface NuevoRecinto {
+  nombre: string;
+  canton: string;
+  parroquia: string;
+  provincia: string;
+  cantidad_jrv: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -31,4 +39,18 @@ export class RecintosRepository {
 
     return (data ?? []) as Recinto[];
   }
+
+  async crear(recinto: NuevoRecinto): Promise<Recinto> {
+  const { data, error } = await this.supabase
+    .from('recintos')
+    .insert(recinto)
+    .select('id, nombre, canton, parroquia, cantidad_jrv, provincia')
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Recinto;
+}
 }

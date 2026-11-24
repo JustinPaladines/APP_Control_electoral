@@ -133,3 +133,63 @@
     font-size: 19px;
   }
 }
+.formulario-recinto {
+  background: #ffffff;
+  color: #29213d;
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 24px;
+  border: 1px solid #e6dfec;
+
+  h2 {
+    color: #29213d;
+    font-size: 19px;
+    font-weight: 700;
+  }
+
+  > p {
+    color: #71677c;
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  ion-label {
+    display: block;
+    color: #49365f;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 16px 0 8px;
+  }
+
+  ion-item {
+    --background: #f8f6fa;
+    --color: #29213d;
+    --border-radius: 10px;
+    --highlight-color-focused: #49365f;
+
+    border: 1px solid #e6dfec;
+    border-radius: 10px;
+  }
+
+  ion-input {
+    --color: #29213d;
+    --placeholder-color: #897e96;
+    --placeholder-opacity: 1;
+    --caret-color: #49365f;
+    color: #29213d;
+  }
+
+  ion-button {
+    --background: #49365f;
+    --color: #ffffff;
+    --border-radius: 12px;
+
+    text-transform: none;
+    margin-top: 22px;
+  }
+
+  .error-formulario {
+    color: #b42318;
+    font-size: 12px;
+  }
+}
