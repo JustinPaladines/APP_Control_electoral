@@ -116,4 +116,10 @@ irVeedores(): void {
     queryParams: { seccion: 'veedores' }
   });
 }
+
+irActas(): void {
+
+  this.router.navigateByUrl('/recinto/actas');
+}
+
 }

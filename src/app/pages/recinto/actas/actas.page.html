@@ -1,0 +1,265 @@
+
+<ion-header>
+
+  <ion-toolbar class="toolbar">
+
+    <ion-button
+      slot="start"
+      fill="clear"
+      (click)="regresar()">
+
+      <ion-icon name="arrow-back-outline"></ion-icon>
+
+    </ion-button>
+
+    <ion-title>Gestión de actas</ion-title>
+
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content class="contenido">
+
+  <div class="contenedor">
+
+    <div class="encabezado">
+
+      <span>COORDINADOR DE RECINTO</span>
+
+      <h1>Actas electorales</h1>
+
+      <p>
+        Consulta y corrige las actas de tu recinto.
+      </p>
+
+    </div>
+
+    @if (cargando()) {
+
+      <div class="cargando">
+
+        <ion-spinner name="crescent"></ion-spinner>
+
+        <p>Cargando actas electorales...</p>
+
+      </div>
+
+    } @else {
+
+      @if (error()) {
+
+        <div class="mensaje-error">
+          {{ error() }}
+        </div>
+
+      } @else {
+
+        <div class="estadisticas">
+
+          <div class="estadistica">
+            <strong>{{ totalActas() }}</strong>
+            <span>Total actas</span>
+          </div>
+
+          <div class="estadistica">
+            <strong>{{ totalRegistradas() }}</strong>
+            <span>Registradas</span>
+          </div>
+
+          <div class="estadistica">
+            <strong>{{ totalCorregidas() }}</strong>
+            <span>Corregidas</span>
+          </div>
+
+          <div class="estadistica">
+            <strong>{{ totalBorradores() }}</strong>
+            <span>Borradores</span>
+          </div>
+
+        </div>
+
+        <div class="filtros">
+
+          <ion-button
+            size="small"
+            [fill]="filtro() === 'todas' ? 'solid' : 'outline'"
+            (click)="cambiarFiltro('todas')">
+
+            Todas
+
+          </ion-button>
+
+          <ion-button
+            size="small"
+            [fill]="filtro() === 'alcaldia' ? 'solid' : 'outline'"
+            (click)="cambiarFiltro('alcaldia')">
+
+            Alcaldía
+
+          </ion-button>
+
+          <ion-button
+            size="small"
+            [fill]="filtro() === 'prefectura' ? 'solid' : 'outline'"
+            (click)="cambiarFiltro('prefectura')">
+
+            Prefectura
+
+          </ion-button>
+
+        </div>
+
+        @for (acta of actasFiltradas(); track acta.id) {
+
+          <div class="tarjeta">
+
+            <div class="titulo-acta">
+
+              <ion-icon name="document-text-outline"></ion-icon>
+
+              <div>
+
+                <h2>{{ obtenerDignidad(acta) }}</h2>
+
+                <p>
+                  JRV N.º {{ obtenerNumeroJunta(acta.jrv_id) }}
+                </p>
+
+              </div>
+
+            </div>
+
+            <span
+              class="estado"
+              [class.registrada]="acta.estado === 'registrada'"
+              [class.corregida]="acta.estado === 'corregida'">
+
+              {{ acta.estado }}
+
+            </span>
+
+            <div class="resultados">
+
+              <div>
+                <span>Sufragantes</span>
+                <strong>{{ acta.total_sufragantes }}</strong>
+              </div>
+
+              <div>
+                <span>Nulos</span>
+                <strong>{{ acta.votos_nulos }}</strong>
+              </div>
+
+              <div>
+                <span>Blancos</span>
+                <strong>{{ acta.votos_blancos }}</strong>
+              </div>
+
+            </div>
+
+            <div class="informacion">
+
+              <p>
+
+                <ion-icon name="camera-outline"></ion-icon>
+
+                Fotografía:
+                {{ acta.foto_url ? 'Registrada' : 'Pendiente' }}
+
+              </p>
+
+              <p>
+
+                <ion-icon name="location-outline"></ion-icon>
+
+                GPS:
+                {{
+                  acta.latitud !== null &&
+                  acta.longitud !== null
+                    ? 'Registrado'
+                    : 'Pendiente'
+                }}
+
+              </p>
+
+              @if (
+                acta.latitud !== null &&
+                acta.longitud !== null
+              ) {
+
+                <p>Latitud: {{ acta.latitud }}</p>
+
+                <p>Longitud: {{ acta.longitud }}</p>
+
+              }
+
+            </div>
+
+            <ion-button
+              expand="block"
+              (click)="corregirActa(acta)">
+
+              <ion-icon
+                slot="start"
+                name="create-outline">
+              </ion-icon>
+
+              Consultar y corregir votos
+
+            </ion-button>
+
+            <ion-button
+              expand="block"
+              fill="outline"
+              (click)="abrirEvidencias(acta)">
+
+              <ion-icon
+                slot="start"
+                name="camera-outline">
+              </ion-icon>
+
+              Consultar fotografía y GPS
+
+            </ion-button>
+
+          </div>
+
+        } @empty {
+
+          <div class="vacio">
+
+            <ion-icon name="document-text-outline"></ion-icon>
+
+            <h3>No hay actas disponibles</h3>
+
+            <p>
+              Las actas registradas por los veedores
+              aparecerán aquí.
+            </p>
+
+          </div>
+
+        }
+
+      }
+
+    }
+
+    <ion-button
+      expand="block"
+      fill="outline"
+      [disabled]="cargando()"
+      (click)="cargarDatos()">
+
+      <ion-icon
+        slot="start"
+        name="refresh-outline">
+      </ion-icon>
+
+      Actualizar información
+
+    </ion-button>
+
+  </div>
+
+</ion-content>

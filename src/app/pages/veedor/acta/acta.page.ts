@@ -35,6 +35,7 @@ import { ActasService } from '../../../core/services/actas.service';
 import { ElectoralService } from '../../../core/services/electoral.service';
 
 import { Dignidad } from '../../../core/models/acta.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 // Validar números enteros no negativos.
 function validarCantidad(control: AbstractControl) {
@@ -79,6 +80,12 @@ export class ActaPage {
 
   readonly actasService = inject(ActasService);
   readonly electoral = inject(ElectoralService);
+
+  private readonly authService = inject(AuthService);
+
+  readonly esCoordinador = computed(() =>
+    this.authService.perfil()?.rol === 'recinto'
+  );
 
   readonly dignidad = signal<Dignidad>('alcaldia');
 
@@ -172,16 +179,27 @@ export class ActaPage {
       this.dignidad.set(dignidad);
 
       // Consultar la asignación actual del veedor.
-      const resultado = await this.electoral.cargarMiJunta();
+
+      const resultado = this.esCoordinador()
+        ? await this.electoral.cargarRecinto()
+        : await this.electoral.cargarMiJunta();
 
       if (!resultado) {
-        throw new Error('No se pudo consultar la junta.');
+        throw new Error('No se pudieron consultar las juntas.');
       }
 
-      const junta = this.electoral.juntas()[0];
+      // Obtener la junta seleccionada por el coordinador
+      // o la junta asignada al veedor.
+      const junta = this.esCoordinador()
+        ? this.electoral.juntas().find(
+            j => j.id === Number(
+              this.route.snapshot.paramMap.get('jrvId')
+            )
+          )
+        : this.electoral.juntas()[0];
 
       if (!junta) {
-        throw new Error('No tienes una junta asignada.');
+        throw new Error('No tienes acceso a esta junta.');
       }
 
       this.juntaId.set(junta.id);
@@ -197,6 +215,12 @@ export class ActaPage {
       }
 
       const existente = this.actasService.actaActual();
+
+      if (this.esCoordinador() && !existente) {
+        throw new Error(
+          'El coordinador solamente puede corregir actas existentes.'
+        );
+      }
 
       const votos = this.actasService.candidaturas().map(
         candidatura =>
@@ -319,15 +343,23 @@ export class ActaPage {
       return;
     }
 
+    const ruta = this.esCoordinador()
+      ? '/recinto/evidencias'
+      : '/veedor/evidencias';
+
     this.router.navigate([
-      '/veedor/evidencias',
+      ruta,
       acta.id
     ]);
   }
 
-  // Regresar al panel del veedor.
+  // Regresar al panel correspondiente.
   regresar(): void {
 
-    this.router.navigateByUrl('/veedor');
+    const ruta = this.esCoordinador()
+      ? '/recinto/actas'
+      : '/veedor';
+
+    this.router.navigateByUrl(ruta);
   }
 }

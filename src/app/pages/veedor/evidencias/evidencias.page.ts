@@ -14,6 +14,7 @@ import {
 } from '@ionic/angular';
 
 import { addIcons } from 'ionicons';
+import { AuthService } from '../../../core/services/auth.service';
 
 import {
   arrowBackOutline,
@@ -55,6 +56,12 @@ export class EvidenciasPage {
     this.evidencias.acta()?.dignidad === 'alcaldia'
       ? 'Alcaldía'
       : 'Prefectura'
+  );
+
+  private readonly authService = inject(AuthService);
+
+  readonly esCoordinador = computed(() =>
+    this.authService.perfil()?.rol === 'recinto'
   );
 
   readonly puedeFinalizar = computed(() =>
@@ -154,6 +161,10 @@ export class EvidenciasPage {
 
   regresar(): void {
 
-    this.router.navigateByUrl('/veedor');
-  }
+  const ruta = this.esCoordinador()
+    ? '/recinto/actas'
+    : '/veedor';
+
+  this.router.navigateByUrl(ruta);
+}
 }
