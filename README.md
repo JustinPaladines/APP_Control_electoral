@@ -377,13 +377,8 @@ npx cap sync android
 npx cap open android
 ```
 
-### Generar el APK desde Windows
+### Generar el APK 
 
-```powershell
-cd android
-.\gradlew.bat assembleDebug
-cd ..
-```
 
 El archivo APK se genera en:
 
