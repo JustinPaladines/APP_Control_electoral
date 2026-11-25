@@ -148,3 +148,30 @@
     grid-template-columns: 1fr;
   }
 }
+
+.module-card {
+  --background: #ffffff;
+  --color: #29213d;
+
+  background: #ffffff;
+  color: #29213d;
+}
+
+.module-card ion-card-title {
+  --color: #29213d;
+  color: #29213d;
+}
+
+.module-card ion-card-subtitle {
+  --color: #71677c;
+  color: #71677c;
+}
+
+.module-card .module-icon {
+  background: #e7e0ef;
+  color: #49365f;
+}
+
+.module-card ion-icon {
+  color: #49365f;
+}

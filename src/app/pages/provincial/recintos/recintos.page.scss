@@ -193,3 +193,45 @@
     font-size: 12px;
   }
 }
+
+ion-content {
+  --background: #f1edf6;
+  --color: #29213d;
+}
+
+ion-card {
+  --background: #ffffff;
+  --color: #29213d;
+  background: #ffffff;
+  color: #29213d;
+}
+
+ion-card-title {
+  --color: #29213d;
+  color: #29213d;
+}
+
+ion-card-subtitle {
+  --color: #71677c;
+  color: #71677c;
+}
+
+ion-card-content {
+  color: #29213d;
+}
+
+ion-item {
+  --background: #ffffff;
+  --color: #29213d;
+  --border-color: #e7e0ef;
+}
+
+ion-input,
+ion-select {
+  --color: #29213d;
+  --placeholder-color: #71677c;
+}
+
+ion-label {
+  color: #29213d;
+}

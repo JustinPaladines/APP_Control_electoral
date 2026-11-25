@@ -151,10 +151,6 @@ export class LoginPage {
 
     }
 
-        await this.mostrarMensaje(
-        'El panel de este rol todavía está en desarrollo.',
-        'warning'
-        );
   }
 
   cambiarVisibilidadPassword(): void {
