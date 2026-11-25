@@ -1,0 +1,154 @@
+.toolbar {
+  --background: #29213d;
+  --color: #ffffff;
+
+  ion-button {
+    --color: #ffffff;
+  }
+}
+
+.contenido {
+  --background: #f1edf6;
+}
+
+.contenedor {
+  max-width: 650px;
+  margin: auto;
+  padding: 20px 16px;
+  color: #29213d;
+}
+
+.encabezado {
+  background: #49365f;
+  color: #ffffff;
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+
+  span {
+    font-size: 12px;
+    color: #e7e0ef;
+  }
+
+  h1 {
+    font-size: 25px;
+    font-weight: 700;
+    margin: 12px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: #e7e0ef;
+  }
+}
+
+.tarjeta {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 15px rgba(41, 33, 61, 0.05);
+
+  h2 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 16px;
+  }
+
+  p {
+    font-size: 13px;
+    color: #71677c;
+    line-height: 1.5;
+  }
+}
+
+.sin-foto {
+  background: #f1edf6;
+  border: 2px dashed #c5bcd1;
+  border-radius: 12px;
+  padding: 35px 15px;
+  text-align: center;
+  margin-bottom: 15px;
+
+  ion-icon {
+    font-size: 50px;
+    color: #75618f;
+  }
+}
+
+.fotografia {
+  width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  background: #f1edf6;
+  border-radius: 12px;
+}
+
+.ubicacion {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #f1edf6;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+
+  ion-icon {
+    font-size: 32px;
+    color: #49365f;
+    flex-shrink: 0;
+  }
+
+  p {
+    margin: 6px 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+ion-button {
+  --background: #49365f;
+  --color: #ffffff;
+  --border-radius: 10px;
+  text-transform: none;
+  margin-top: 10px;
+}
+
+ion-button[fill="outline"] {
+  --background: transparent;
+  --color: #49365f;
+  --border-color: #49365f;
+}
+
+.mensaje-error,
+.mensaje-exito,
+.mensaje-info {
+  padding: 13px;
+  border-radius: 10px;
+  margin: 14px 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.mensaje-error {
+  background: #fce8e8;
+  color: #b42318;
+}
+
+.mensaje-exito {
+  background: #e1f4e7;
+  color: #237a48;
+}
+
+.mensaje-info {
+  background: #e7e0ef;
+  color: #49365f;
+}
+
+.nota,
+.cargando {
+  text-align: center;
+  color: #71677c;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 10px;
+}

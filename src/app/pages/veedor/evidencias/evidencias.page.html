@@ -1,0 +1,244 @@
+
+<ion-header>
+  <ion-toolbar class="toolbar">
+
+    <ion-button
+      slot="start"
+      fill="clear"
+      (click)="regresar()">
+
+      <ion-icon name="arrow-back-outline"></ion-icon>
+
+    </ion-button>
+
+    <ion-title>Evidencias del acta</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="contenido">
+
+  <div class="contenedor">
+
+    @if (evidencias.cargando()) {
+
+      <div class="cargando">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Procesando información...</p>
+      </div>
+
+    }
+
+    @if (evidencias.acta(); as acta) {
+
+      <div class="encabezado">
+
+        <span>CONTROL ELECTORAL</span>
+
+        <h1>Acta de {{ titulo() }}</h1>
+
+        <p>Estado: {{ acta.estado }}</p>
+
+        <p>Sufragantes: {{ acta.total_sufragantes }}</p>
+
+      </div>
+
+      <div class="tarjeta">
+
+        <h2>1. Fotografía del acta</h2>
+
+        @if (evidencias.foto()) {
+
+          <a
+            [href]="evidencias.foto()"
+            target="_blank"
+            rel="noopener noreferrer">
+
+            <img
+              class="fotografia"
+              [src]="evidencias.foto()"
+              alt="Fotografía del acta electoral">
+
+          </a>
+
+          <p>Toca la fotografía para verla ampliada.</p>
+
+          @if (evidencias.fotoAceptada()) {
+
+            <div class="mensaje-exito">
+
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+
+              Fotografía aceptada.
+
+            </div>
+
+          } @else {
+
+            <div class="mensaje-info">
+
+              Comprueba que todos los números y textos
+              sean legibles y que la fotografía no esté borrosa.
+
+            </div>
+
+            <ion-button
+              expand="block"
+              [disabled]="evidencias.cargando()"
+              (click)="aceptarFoto()">
+
+              Aceptar fotografía
+
+            </ion-button>
+
+          }
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            [disabled]="evidencias.cargando()"
+            (click)="rechazarFoto()">
+
+            Rechazar fotografía
+
+          </ion-button>
+
+        } @else {
+
+          <div class="sin-foto">
+
+            <ion-icon name="camera-outline"></ion-icon>
+
+            <p>Sin fotografía</p>
+
+          </div>
+
+        }
+
+        @if (plataformaNativa) {
+
+          <ion-button
+            expand="block"
+            [disabled]="evidencias.cargando()"
+            (click)="tomarFoto()">
+
+            <ion-icon slot="start" name="camera-outline"></ion-icon>
+
+            Tomar fotografía
+
+          </ion-button>
+
+        } @else {
+
+          <input
+            #archivo
+            type="file"
+            accept="image/jpeg,image/png"
+            capture="environment"
+            hidden
+            (change)="seleccionarFoto($event)">
+
+          <ion-button
+            expand="block"
+            [disabled]="evidencias.cargando()"
+            (click)="archivo.click()">
+
+            <ion-icon slot="start" name="image-outline"></ion-icon>
+
+            Seleccionar fotografía
+
+          </ion-button>
+
+        }
+
+      </div>
+
+      <div class="tarjeta">
+
+        <h2>2. Ubicación GPS</h2>
+
+        <div class="ubicacion">
+
+          <ion-icon name="location-outline"></ion-icon>
+
+          <div>
+
+            <p>
+              <strong>Latitud:</strong>
+              {{ evidencias.latitud() ?? 'Pendiente' }}
+            </p>
+
+            <p>
+              <strong>Longitud:</strong>
+              {{ evidencias.longitud() ?? 'Pendiente' }}
+            </p>
+
+            @if (evidencias.precision() !== null) {
+
+              <p>
+                <strong>Precisión:</strong>
+                {{ evidencias.precision() }} metros
+              </p>
+
+            }
+
+          </div>
+
+        </div>
+
+        <ion-button
+          expand="block"
+          fill="outline"
+          [disabled]="evidencias.cargando()"
+          (click)="obtenerUbicacion()">
+
+          <ion-icon slot="start" name="location-outline"></ion-icon>
+
+          Obtener ubicación
+
+        </ion-button>
+
+      </div>
+
+      <ion-button
+        expand="block"
+        [disabled]="!puedeFinalizar()"
+        (click)="finalizarActa()">
+
+        <ion-icon
+          slot="start"
+          name="checkmark-circle-outline">
+        </ion-icon>
+
+        {{ acta.estado === 'borrador'
+          ? 'Finalizar acta'
+          : 'Actualizar evidencias' }}
+
+      </ion-button>
+
+      <p class="nota">
+        Es necesario aceptar la fotografía y registrar
+        la ubicación para finalizar el acta.
+      </p>
+
+    }
+
+    @if (evidencias.error()) {
+
+      <div class="mensaje-error">
+        {{ evidencias.error() }}
+      </div>
+
+    }
+
+    @if (evidencias.exito()) {
+
+      <div class="mensaje-exito">
+        {{ evidencias.exito() }}
+      </div>
+
+    }
+
+  </div>
+
+</ion-content>

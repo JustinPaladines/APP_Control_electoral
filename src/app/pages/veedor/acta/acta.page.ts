@@ -94,10 +94,10 @@ export class ActaPage {
   readonly cantidadesValidas = signal(false);
 
   readonly titulo = computed(() =>
-  this.dignidad() === 'alcaldia'
-    ? 'Alcaldía'
-    : 'Prefectura'
-);
+    this.dignidad() === 'alcaldia'
+      ? 'Alcaldía'
+      : 'Prefectura'
+  );
 
   readonly diferencia = computed(() =>
     this.totalSufragantes() - this.totalCalculado()
@@ -166,8 +166,8 @@ export class ActaPage {
         this.route.snapshot.paramMap.get('dignidad');
 
       if (dignidad !== 'alcaldia' && dignidad !== 'prefectura') {
-    throw new Error('Dignidad electoral inválida.');
-  }
+        throw new Error('Dignidad electoral inválida.');
+      }
 
       this.dignidad.set(dignidad);
 
@@ -206,6 +206,7 @@ export class ActaPage {
       );
 
       this.formulario.reset({
+
         total_sufragantes:
           existente?.acta.total_sufragantes ?? 0,
 
@@ -283,7 +284,7 @@ export class ActaPage {
       })
     );
 
-    await this.actasService.guardarActa({
+    const guardado = await this.actasService.guardarActa({
 
       jrv_id: this.juntaId(),
       dignidad: this.dignidad(),
@@ -294,9 +295,39 @@ export class ActaPage {
 
       resultados
     });
+
+    // Marcar el formulario como guardado correctamente.
+    if (
+      guardado &&
+      JSON.stringify(this.formulario.getRawValue()) ===
+      JSON.stringify(datos)
+    ) {
+      this.formulario.markAsPristine();
+    }
   }
 
+  // Abrir la página de fotografía y ubicación GPS.
+  abrirEvidencias(): void {
+
+    const acta = this.actasService.actaActual()?.acta;
+
+    if (
+      !acta ||
+      this.formulario.dirty ||
+      this.actasService.cargando()
+    ) {
+      return;
+    }
+
+    this.router.navigate([
+      '/veedor/evidencias',
+      acta.id
+    ]);
+  }
+
+  // Regresar al panel del veedor.
   regresar(): void {
+
     this.router.navigateByUrl('/veedor');
   }
 }

@@ -275,10 +275,42 @@
 
         </ion-button>
 
+
+    @if (actasService.actaActual(); as datos) {
+
+      <ion-button
+        expand="block"
+        fill="outline"
+        type="button"
+        [disabled]="
+          actasService.cargando() ||
+          formulario.dirty
+        "
+        (click)="abrirEvidencias()">
+
+        {{ datos.acta.estado === 'borrador'
+          ? 'Registrar fotografía y GPS'
+          : 'Consultar evidencias' }}
+
+      </ion-button>
+
+      @if (formulario.dirty) {
+
         <p class="nota">
-          La fotografía y ubicación serán necesarias
-          para completar el acta.
+          Guarda los cambios antes de continuar.
         </p>
+
+      }
+
+    } @else {
+
+      <p class="nota">
+        Guarda los resultados para registrar
+        la fotografía y ubicación GPS.
+      </p>
+
+      }
+
 
       </form>
 
