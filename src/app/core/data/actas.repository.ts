@@ -8,8 +8,11 @@ import {
   Candidatura,
   Dignidad,
   NuevaActa,
-  ResultadoActa
+  ResultadoActa,
+  ResultadoProvincial 
 } from '../models/acta.model';
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -121,4 +124,74 @@ export class ActasRepository {
 
     return (data ?? []) as Acta[];
   }
+
+  
+// Consultar todos los resultados electorales autorizados.
+async listarResultados(): Promise<ResultadoProvincial[]> {
+
+  const resultados: ResultadoProvincial[] = [];
+  const limite = 500;
+
+  let inicio = 0;
+
+  while (true) {
+
+    const { data, error } = await this.supabase
+      .from('acta_resultados')
+      .select('acta_id, candidatura_id, cantidad_votos')
+      .order('id', { ascending: true })
+      .range(inicio, inicio + limite - 1);
+
+    if (error) {
+      throw error;
+    }
+
+    const registros = data ?? [];
+
+    resultados.push(...registros);
+
+    if (registros.length < limite) {
+      break;
+    }
+
+    inicio += limite;
+  }
+
+  return resultados;
+}
+
+// Consultar todas las actas autorizadas.
+async listarActasProvinciales(): Promise<Acta[]> {
+
+  const actas: Acta[] = [];
+  const limite = 500;
+
+  let inicio = 0;
+
+  while (true) {
+
+    const { data, error } = await this.supabase
+      .from('actas')
+      .select('*')
+      .order('id', { ascending: true })
+      .range(inicio, inicio + limite - 1);
+
+    if (error) {
+      throw error;
+    }
+
+    const registros = data ?? [];
+
+    actas.push(...registros as Acta[]);
+
+    if (registros.length < limite) {
+      break;
+    }
+
+    inicio += limite;
+  }
+
+  return actas;
+}
+
 }

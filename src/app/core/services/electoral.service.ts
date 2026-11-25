@@ -176,4 +176,29 @@ export class ElectoralService {
       );
     });
   }
+
+
+  // Consultar las juntas desde el perfil provincial.
+  async cargarJuntasProvinciales(): Promise<boolean> {
+
+    return this.ejecutar(async () => {
+
+      this._juntas.set([]);
+      this._veedores.set([]);
+      this._asignaciones.set([]);
+
+      const perfil = this.authService.perfil();
+
+      if (perfil?.rol !== 'provincial') {
+
+        throw new Error('Usuario no autorizado.');
+      }
+
+      const juntas =
+        await this.repository.listarJuntasProvinciales();
+
+      this._juntas.set(juntas);
+
+    });
+  }
 }

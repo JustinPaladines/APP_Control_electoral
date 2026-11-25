@@ -79,26 +79,27 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/veedor/evidencias/evidencias.page').then((m) => m.EvidenciasPage),
   },
   {
-  path: 'recinto/actas',
-  canActivate: [recintoGuard],
+    path: 'recinto/actas',
+    canActivate: [recintoGuard],
+    loadComponent: () => import('./pages/recinto/actas/actas.page').then((m) => m.ActasPage),
+  },
+  {
+    path: 'recinto/acta/:jrvId/:dignidad',
+    canActivate: [recintoGuard],
+    loadComponent: () => import('./pages/veedor/acta/acta.page').then((m) => m.ActaPage),
+  },
+  {
+    path: 'recinto/evidencias/:id',
+    canActivate: [recintoGuard],
+    loadComponent: () => import('./pages/veedor/evidencias/evidencias.page').then((m) => m.EvidenciasPage),
+  },
+  {
+  path: 'provincial/control',
+  canActivate: [provincialGuard],
   loadComponent: () =>
-    import('./pages/recinto/actas/actas.page')
-      .then(m => m.ActasPage)
-},
-{
-  path: 'recinto/acta/:jrvId/:dignidad',
-  canActivate: [recintoGuard],
-  loadComponent: () =>
-    import('./pages/veedor/acta/acta.page')
-      .then(m => m.ActaPage)
-},
-{
-  path: 'recinto/evidencias/:id',
-  canActivate: [recintoGuard],
-  loadComponent: () =>
-    import('./pages/veedor/evidencias/evidencias.page')
-      .then(m => m.EvidenciasPage)
-},
+    import('./pages/provincial/control/control.page')
+      .then(m => m.ControlPage)
+  },
   // Página inicial
   {
     path: '',

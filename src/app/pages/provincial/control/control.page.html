@@ -1,0 +1,554 @@
+
+<ion-header>
+
+  <ion-toolbar class="toolbar">
+
+    <ion-button
+      slot="start"
+      fill="clear"
+      (click)="regresar()">
+
+      <ion-icon name="arrow-back-outline"></ion-icon>
+
+    </ion-button>
+
+    <ion-title>Control provincial</ion-title>
+
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content class="contenido">
+
+  <div class="contenedor">
+
+    <div class="encabezado">
+
+      <span>COORDINADOR PROVINCIAL</span>
+
+      <h1>Control electoral</h1>
+
+      <p>Pichincha · Quito</p>
+
+    </div>
+
+    @if (cargando()) {
+
+      <div class="cargando">
+
+        <ion-spinner name="crescent"></ion-spinner>
+
+        <p>Cargando información electoral...</p>
+
+      </div>
+
+    } @else if (error()) {
+
+      <div class="mensaje-error">
+
+        {{ error() }}
+
+      </div>
+
+    } @else {
+
+      <div class="navegacion">
+
+        <ion-button
+          [fill]="seccion() === 'actas' ? 'solid' : 'outline'"
+          (click)="cambiarSeccion('actas')">
+
+          <ion-icon
+            slot="start"
+            name="document-text-outline">
+          </ion-icon>
+
+          Actas
+
+        </ion-button>
+
+        <ion-button
+          [fill]="seccion() === 'resultados' ? 'solid' : 'outline'"
+          (click)="cambiarSeccion('resultados')">
+
+          <ion-icon
+            slot="start"
+            name="bar-chart-outline">
+          </ion-icon>
+
+          Resultados
+
+        </ion-button>
+
+      </div>
+
+      <div class="tarjeta">
+
+        <h2>Filtros de consulta</h2>
+
+        <ion-select
+          label="Recinto electoral"
+          labelPlacement="stacked"
+          interface="alert"
+          [value]="recintoSeleccionado()"
+          (ionChange)="cambiarRecinto($event)">
+
+          <ion-select-option [value]="0">
+
+            Todos los recintos
+
+          </ion-select-option>
+
+          @for (
+            recinto of recintosService.recintos();
+            track recinto.id
+          ) {
+
+            <ion-select-option [value]="recinto.id">
+
+              {{ recinto.nombre }}
+
+            </ion-select-option>
+
+          }
+
+        </ion-select>
+
+        <div class="navegacion">
+
+          <ion-button
+            size="small"
+            [fill]="dignidad() === 'alcaldia' ? 'solid' : 'outline'"
+            (click)="cambiarDignidad('alcaldia')">
+
+            Alcaldía
+
+          </ion-button>
+
+          <ion-button
+            size="small"
+            [fill]="dignidad() === 'prefectura' ? 'solid' : 'outline'"
+            (click)="cambiarDignidad('prefectura')">
+
+            Prefectura
+
+          </ion-button>
+
+        </div>
+
+      </div>
+
+      <div class="tarjeta">
+
+        <h2>Avance electoral</h2>
+
+        <div class="estadisticas">
+
+          <div class="estadistica">
+
+            <strong>{{ totalEsperadas() }}</strong>
+
+            <span>JRV previstas</span>
+
+          </div>
+
+          <div class="estadistica">
+
+            <strong>{{ totalJuntas() }}</strong>
+
+            <span>JRV generadas</span>
+
+          </div>
+
+          <div class="estadistica">
+
+            <strong>{{ juntasCompletadas() }}</strong>
+
+            <span>JRV completadas</span>
+
+          </div>
+
+          <div class="estadistica">
+
+            <strong>{{ actasValidas().length }}</strong>
+
+            <span>Actas finalizadas</span>
+
+          </div>
+
+        </div>
+
+        <div class="avance">
+
+          <span>Avance de juntas</span>
+
+          <strong>{{ avance() }}%</strong>
+
+        </div>
+
+        <div class="barra">
+
+          <div
+            class="barra-progreso"
+            [style.width.%]="avance()">
+          </div>
+
+        </div>
+
+      </div>
+
+      @if (seccion() === 'actas') {
+
+        <h2 class="titulo-seccion">
+
+          Actas de
+          {{ dignidad() === 'alcaldia'
+            ? 'Alcaldía'
+            : 'Prefectura' }}
+
+        </h2>
+
+        @for (acta of actasFiltradas(); track acta.id) {
+
+          <div class="tarjeta">
+
+            <h2>{{ obtenerRecinto(acta.jrv_id) }}</h2>
+
+            <p>JRV N.º {{ obtenerNumeroJunta(acta.jrv_id) }}</p>
+
+            <span
+              class="estado"
+              [class.finalizada]="acta.estado !== 'borrador'">
+
+              {{ acta.estado }}
+
+            </span>
+
+            <p>Sufragantes: {{ acta.total_sufragantes }}</p>
+
+            <p>
+
+              Fotografía:
+              {{ acta.foto_url ? 'Registrada' : 'Pendiente' }}
+
+            </p>
+
+            <p>
+
+              GPS:
+              {{
+                acta.latitud !== null &&
+                acta.longitud !== null
+                  ? 'Registrado'
+                  : 'Pendiente'
+              }}
+
+            </p>
+
+            <ion-button
+              expand="block"
+              fill="outline"
+              [disabled]="evidencias.cargando()"
+              (click)="seleccionarActa(acta)">
+
+              Consultar acta
+
+            </ion-button>
+
+            @if (actaSeleccionada()?.id === acta.id) {
+
+              <div class="detalle">
+
+                <h3>Resultados individuales</h3>
+
+                @for (
+                  candidato of resultados();
+                  track candidato.id
+                ) {
+
+                  <div class="fila-votos">
+
+                    <div>
+
+                      <strong>{{ candidato.nombre }}</strong>
+
+                      <small>{{ candidato.organizacion }}</small>
+
+                    </div>
+
+                    <strong>
+
+                      {{ obtenerVotosActa(acta.id, candidato.id) }}
+
+                    </strong>
+
+                  </div>
+
+                }
+
+                <div class="fila-votos">
+
+                  <span>Votos nulos</span>
+
+                  <strong>{{ acta.votos_nulos }}</strong>
+
+                </div>
+
+                <div class="fila-votos">
+
+                  <span>Votos blancos</span>
+
+                  <strong>{{ acta.votos_blancos }}</strong>
+
+                </div>
+
+                <h3>Ubicación GPS</h3>
+
+                <p>
+
+                  Latitud:
+                  {{ acta.latitud ?? 'Pendiente' }}
+
+                </p>
+
+                <p>
+
+                  Longitud:
+                  {{ acta.longitud ?? 'Pendiente' }}
+
+                </p>
+
+                @if (acta.foto_url) {
+
+                  <ion-button
+                    expand="block"
+                    [disabled]="evidencias.cargando()"
+                    (click)="consultarFoto(acta)">
+
+                    <ion-icon
+                      slot="start"
+                      name="camera-outline">
+                    </ion-icon>
+
+                    Ver fotografía
+
+                  </ion-button>
+
+                  @if (evidencias.cargando()) {
+
+                    <div class="cargando">
+
+                      <ion-spinner name="crescent"></ion-spinner>
+
+                    </div>
+
+                  }
+
+                  @if (
+                    mostrarFoto() &&
+                    evidencias.acta()?.id === acta.id
+                  ) {
+
+                    <a
+                      [href]="evidencias.foto()"
+                      target="_blank"
+                      rel="noopener noreferrer">
+
+                      <img
+                        class="fotografia"
+                        [src]="evidencias.foto()"
+                        alt="Fotografía del acta electoral">
+
+                    </a>
+
+                  }
+
+                  @if (evidencias.error()) {
+
+                    <p class="mensaje-error">
+
+                      {{ evidencias.error() }}
+
+                    </p>
+
+                  }
+
+                }
+
+                <ion-button
+                  expand="block"
+                  fill="outline"
+                  (click)="cerrarDetalle()">
+
+                  Cerrar detalle
+
+                </ion-button>
+
+              </div>
+
+            }
+
+          </div>
+
+        } @empty {
+
+          <div class="vacio">
+
+            <ion-icon name="document-text-outline"></ion-icon>
+
+            <p>No existen actas para esta consulta.</p>
+
+          </div>
+
+        }
+
+      } @else {
+
+        <div class="tarjeta">
+
+          <h2>Resumen de resultados</h2>
+
+          <div class="estadisticas">
+
+            <div class="estadistica">
+
+              <strong>{{ totalSufragantes() }}</strong>
+
+              <span>Sufragantes</span>
+
+            </div>
+
+            <div class="estadistica">
+
+              <strong>{{ totalVotosValidos() }}</strong>
+
+              <span>Votos válidos</span>
+
+            </div>
+
+            <div class="estadistica">
+
+              <strong>{{ totalNulos() }}</strong>
+
+              <span>Votos nulos</span>
+
+            </div>
+
+            <div class="estadistica">
+
+              <strong>{{ totalBlancos() }}</strong>
+
+              <span>Votos blancos</span>
+
+            </div>
+
+          </div>
+
+          <p class="nota">
+
+            Se consideran únicamente actas registradas
+            y corregidas.
+
+          </p>
+
+        </div>
+
+        <div class="tarjeta">
+
+          <h2>
+
+            Resultados de
+            {{ dignidad() === 'alcaldia'
+              ? 'Alcaldía'
+              : 'Prefectura' }}
+
+          </h2>
+
+          <p class="nota">
+
+            Resultados parciales del control electoral.
+
+          </p>
+
+          @if (actasValidas().length === 0) {
+
+            <p class="vacio">
+
+              No existen actas finalizadas para esta consulta.
+
+            </p>
+
+          }
+
+          @for (candidato of resultados(); track candidato.id) {
+
+            <div class="candidato">
+
+              <div class="candidato-encabezado">
+
+                <div>
+
+                  <strong>{{ candidato.nombre }}</strong>
+
+                  <small>{{ candidato.organizacion }}</small>
+
+                </div>
+
+                <div class="cantidad">
+
+                  <strong>{{ candidato.votos }}</strong>
+
+                  <small>
+
+                    {{ obtenerPorcentaje(candidato.votos) }}%
+
+                  </small>
+
+                </div>
+
+              </div>
+
+              <div class="barra">
+
+                <div
+                  class="barra-votos"
+                  [style.width.%]="obtenerPorcentaje(candidato.votos)">
+                </div>
+
+              </div>
+
+            </div>
+
+          }
+
+          <p class="nota">
+
+            Los porcentajes se calculan sobre los votos válidos,
+            sin incluir nulos ni blancos.
+
+          </p>
+
+        </div>
+
+      }
+
+    }
+
+    <ion-button
+      expand="block"
+      fill="outline"
+      [disabled]="cargando() || evidencias.cargando()"
+      (click)="cargarDatos()">
+
+      <ion-icon
+        slot="start"
+        name="refresh-outline">
+      </ion-icon>
+
+      Actualizar información
+
+    </ion-button>
+
+  </div>
+
+</ion-content>

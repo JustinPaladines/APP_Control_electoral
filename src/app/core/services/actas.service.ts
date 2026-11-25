@@ -7,8 +7,11 @@ import {
   ActaCompleta,
   Candidatura,
   Dignidad,
-  NuevaActa
+  NuevaActa,
+  ResultadoProvincial
 } from '../models/acta.model';
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +35,18 @@ export class ActasService {
   readonly cargando = this._cargando.asReadonly();
   readonly error = this._error.asReadonly();
   readonly exito = this._exito.asReadonly();
+
+  private readonly _resultadosProvinciales =
+  signal<ResultadoProvincial[]>([]);
+
+  private readonly _candidaturasProvinciales =
+    signal<Candidatura[]>([]);
+
+  readonly resultadosProvinciales =
+    this._resultadosProvinciales.asReadonly();
+
+  readonly candidaturasProvinciales =
+    this._candidaturasProvinciales.asReadonly();
 
   // Controlar los estados de cada operación.
   private async ejecutar(
@@ -169,4 +184,44 @@ export class ActasService {
       this._actas.set(actas);
     });
   }
+
+
+  // Consultar información para el control provincial.
+  async cargarControlProvincial(): Promise<boolean> {
+
+    return this.ejecutar(async () => {
+
+      this._actas.set([]);
+      this._resultadosProvinciales.set([]);
+      this._candidaturasProvinciales.set([]);
+
+      const [
+        actas,
+        resultados,
+        alcaldia,
+        prefectura
+      ] = await Promise.all([
+
+        this.repository.listarActasProvinciales(),
+
+        this.repository.listarResultados(),
+
+        this.repository.listarCandidaturas('alcaldia'),
+
+        this.repository.listarCandidaturas('prefectura')
+
+      ]);
+
+      this._actas.set(actas);
+
+      this._resultadosProvinciales.set(resultados);
+
+      this._candidaturasProvinciales.set([
+        ...alcaldia,
+        ...prefectura
+      ]);
+
+    });
+  }
+
 }

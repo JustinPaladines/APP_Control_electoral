@@ -109,4 +109,31 @@ export class DashboardProvincialPage {
       await toast.present();
     }
   }
+
+  // Abrir la consulta provincial de actas.
+  irActas(): void {
+
+    this.router.navigate(
+      ['/provincial/control'],
+      {
+        queryParams: {
+          seccion: 'actas'
+        }
+      }
+    );
+  }
+
+  // Abrir los resultados electorales.
+  irResultados(): void {
+
+    this.router.navigate(
+      ['/provincial/control'],
+      {
+        queryParams: {
+          seccion: 'resultados'
+        }
+      }
+    );
+  }
+
 }

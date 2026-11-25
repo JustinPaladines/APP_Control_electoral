@@ -51,3 +51,9 @@ export interface NuevaActa {
   votos_blancos: number;
   resultados: ResultadoActa[];
 }
+
+export interface ResultadoProvincial {
+  acta_id: number;
+  candidatura_id: number;
+  cantidad_votos: number;
+}

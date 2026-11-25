@@ -101,4 +101,40 @@ export class ElectoralRepository {
       throw error;
     }
   }
+
+
+  // Consultar todas las juntas autorizadas.
+  async listarJuntasProvinciales(): Promise<Jrv[]> {
+
+    const juntas: Jrv[] = [];
+    const limite = 500;
+
+    let inicio = 0;
+
+    while (true) {
+
+      const { data, error } = await this.supabase
+        .from('jrv')
+        .select('*')
+        .order('id', { ascending: true })
+        .range(inicio, inicio + limite - 1);
+
+      if (error) {
+        throw error;
+      }
+
+      const registros = data ?? [];
+
+      juntas.push(...registros as Jrv[]);
+
+      if (registros.length < limite) {
+        break;
+      }
+
+      inicio += limite;
+    }
+
+    return juntas;
+  }
+
 }
